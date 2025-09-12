@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOV LAB - Ginástica Laboral com Propósito</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background-color: #ffffff;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4A90E2;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: #6C757D;
+            font-weight: 400;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            /* IMAGEM ORIGINAL DO ARQUIVO MANTIDA */
+            background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url('https://acuityinternational.com/wp-content/smush-webp/2024/05/group-stretching-workplace-exercises.jpg.webp');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Efeito de parallax mantido */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            padding: 40px 20px;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+        }
+        
+        /* Intro Section */
+        .intro-section {
+            padding: 60px 20px;
+            background-color: #F8F9FA;
+            text-align: center;
+        }
+
+        .intro-text {
+            font-size: 1.2rem;
+            color: #6C757D;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Acervo Section */
+        .acervo-section {
+            padding: 80px 0;
+            background-color: #ffffff; /* Fundo branco para os botões */
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            color: #333;
+            margin-bottom: 50px;
+        }
+
+        .botoes-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-aula {
+            display: block;
+            background: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            text-decoration: none;
+            color: #333;
+            min-width: 350px;
+        }
+        
+        .btn-aula:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(74, 144, 226, 0.15);
+            border-color: rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #4A90E2;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .footer-text {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            .botoes-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-aula {
+                width: 100%;
+                max-width: 400px;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 2rem;
+            }
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (Mantido) -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">MOV LAB</h1>
+                <p class="tagline">Ginástica Laboral com Propósito</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section (com Frase Inspiradora e Imagem Original) -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">Mova seu corpo. Mude seu dia.</h2>
+        </div>
+    </section>
+    
+    <!-- Seção de Texto Introdutório (Nova) -->
+    <section class="intro-section">
+        <div class="container">
+            <p class="intro-text">
+                Bem-vindo(a) ao seu espaço de bem-estar semanal. Aqui você encontra o plano de aulas da semana, pensado para aliviar as tensões do trabalho, reenergizar o corpo e focar a mente. Escolha o dia e prepare-se para transformar sua pausa.
+            </p>
+        </div>
+    </section>
+
+    <!-- Seção do Acervo de Aulas (Nova) -->
+    <section class="acervo-section">
+        <div class="container">
+            <h2 class="section-title">ACERVO MOV LAB</h2>
+            
+            <div class="botoes-container">
+                <!-- Botão 1 -->
+                <a href="pagina1.html" class="btn-aula">
+                    <h3 class="btn-title">AULAS MOV LAB 1 A 12</h3>
+                </a>
+
+                <!-- Botão 2 -->
+                <a href="pagina2.html" class="btn-aula">
+                    <h3 class="btn-title">AULAS MOV LAB 13 A 24</h3>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Mantido) -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">MOV LAB por Fernanda Amarante</p>
+        </div>
+    </footer>
+</body>
+</html>
