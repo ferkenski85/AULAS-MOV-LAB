@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MOV LAB - Aula 43: O Reset Objetivo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff8e53); transition: all 0.3s ease; min-height: 44px; min-width: 44px; }
+        .btn-primary:hover, .btn-primary:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3); }
+        .btn-secondary { background: linear-gradient(135deg, #f6d365, #fda085); transition: all 0.3s ease; min-height: 44px; min-width: 44px; }
+        .btn-secondary:hover, .btn-secondary:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(253, 160, 133, 0.3); }
+        .btn-success { background: linear-gradient(135deg, #43e97b, #38f9d7); transition: all 0.3s ease; min-height: 44px; }
+        .btn-success:hover, .btn-success:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(67, 233, 123, 0.3); }
+        .btn-warning { background: linear-gradient(135deg, #fa709a, #fee140); transition: all 0.3s ease; min-height: 44px; }
+        .btn-warning:hover, .btn-warning:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(250, 112, 154, 0.3); }
+        .btn-music { background: linear-gradient(135deg, #8b5cf6, #a855f7); transition: all 0.3s ease; min-height: 44px; }
+        .btn-music:hover, .btn-music:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); }
+        
+        .exercise-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .exercise-card:hover, .exercise-card:active { border-left-color: #fda085; transform: translateX(5px); }
+        .exercise-card.active {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4) !important;
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        .exercise-card.flow-phase.active {
+            border-left-color: #f6d365;
+            background: linear-gradient(135deg, #fffbeb, #fff8f0) !important;
+        }
+        
+        .timer-display { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.5rem; min-width: 80px; text-align: center; }
+        .timer-display.active { color: #10b981; animation: timerPulse 1s infinite; }
+        .timer-display.warning { color: #f59e0b; animation: timerPulse 0.5s infinite; }
+        .timer-display.danger { color: #ef4444; animation: timerPulse 0.3s infinite; }
+        @keyframes timerPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        
+        .floating-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        .phase-header { background: linear-gradient(135deg, #f6d365, #fda085); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .progress-bar { transition: width 1s ease-in-out; }
+        
+        .sound-indicator { position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 12px 16px; border-radius: 8px; color: white; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; }
+        .sound-indicator.show { opacity: 1; transform: translateY(0); }
+        .sound-indicator.start { background: #10b981; }
+        .sound-indicator.end { background: #ef4444; }
+        .sound-indicator.music { background: #8b5cf6; }
+        
+        .music-controls { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; gap: 10px; flex-wrap: wrap; }
+        .flow-phase { border-left: 4px solid #f6d365 !important; }
+        
+        .ios-audio-banner { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 15px; text-align: center; z-index: 2000; transform: translateY(-100%); transition: transform 0.3s ease; }
+        .ios-audio-banner.show { transform: translateY(0); }
+        .ios-audio-banner button { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 20px; border-radius: 25px; margin-top: 10px; font-weight: bold; min-height: 44px; }
+    </style>
+</head>
+<body class="p-4">
+    <div id="iosAudioBanner" class="ios-audio-banner">
+        <div><i class="fas fa-volume-up mr-2"></i><strong>Ativar Áudio</strong></div>
+        <div class="text-sm mt-1">Toque no botão abaixo para ativar os sons e música de fundo</div>
+        <button onclick="activateAudioForIOS()" id="activateAudioBtn"><i class="fas fa-play mr-2"></i>Ativar Áudio</button>
+    </div>
+
+    <div id="soundIndicator" class="sound-indicator">
+        <i class="fas fa-volume-up mr-2"></i><span id="soundText"></span>
+    </div>
+
+    <div class="music-controls">
+        <button onclick="toggleBackgroundMusic()" id="musicBtn" class="btn-music text-white px-4 py-2 rounded-full"><i class="fas fa-music mr-2"></i>Música</button>
+        <button onclick="adjustVolume(-0.1)" class="btn-secondary text-white px-3 py-2 rounded-full"><i class="fas fa-volume-down"></i></button>
+        <button onclick="adjustVolume(0.1)" class="btn-secondary text-white px-3 py-2 rounded-full"><i class="fas fa-volume-up"></i></button>
+    </div>
+
+    <audio id="backgroundMusic" loop preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+    <audio id="startSound" preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+    <audio id="endSound" preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1dJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+
+    <div class="max-w-4xl mx-auto">
+        <div class="glass-effect rounded-3xl p-8 mb-6 text-center">
+            <div class="floating-icon text-6xl mb-4">⚡</div>
+            <h1 class="text-4xl font-bold phase-header mb-2">Acervo MOV LAB - Aula 43</h1>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">"O Reset Objetivo: Realinhando o Corpo para a Semana"</h2>
+            <div class="flex flex-wrap justify-center gap-4 text-lg text-gray-600">
+                <div class="flex items-center"><i class="fas fa-ban mr-2 text-gray-500"></i>Material: Nenhum</div>
+                <div class="flex items-center"><i class="fas fa-clock mr-2 text-purple-500"></i>12 minutos</div>
+                <div class="flex items-center"><i class="fas fa-bolt mr-2 text-yellow-500"></i>Energia + Foco</div>
+            </div>
+            <div class="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border-l-4 border-yellow-400">
+                <p class="text-gray-700 italic"><strong>Foco da Aula:</strong> Liberar tensões, reativar o corpo com movimentos diretos e eficazes para realinhar a postura e reiniciar o sistema com energia e foco.</p>
+            </div>
+            
+            <div class="mt-6 flex justify-center space-x-4 flex-wrap">
+                <button onclick="startAllTimers()" class="btn-success text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-play mr-2"></i>Iniciar Aula Completa</button>
+                <button onclick="pauseAllTimers()" class="btn-warning text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-pause mr-2"></i>Pausar Tudo</button>
+                <button onclick="resetAllTimers()" class="btn-primary text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-redo mr-2"></i>Reiniciar Tudo</button>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-xl p-4 mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-gray-700">Progresso da Aula</span>
+                <span class="text-sm font-semibold text-gray-700" id="progressText">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="progress-bar bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-3 rounded-full" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-power-off text-green-500 mr-3"></i>FASE 1 - CONEXÃO INICIAL</h3>
+                <div class="text-sm text-gray-600">Duração: 1 minuto e 30 segundos</div>
+            </div>
+            <div class="exercise-card bg-white p-6 rounded-xl mb-4" id="exercise-0">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>O Despertar Vibracional</h4>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-green-600" id="timer-0">01:30</div>
+                        <button onclick="startExerciseTimer(0, 90)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(0)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Em pé, pés na largura dos quadris, joelhos muito levemente flexionados e soltos. Comece a sacudir suavemente todo o corpo. O movimento deve ser leve e partir dos tornozelos, permitindo que a vibração suba pelos joelhos, quadris, coluna, ombros e braços. Relaxe a mandíbula.</p>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Vamos começar a semana sacudindo a poeira e a inércia do fim de semana. Deixem os joelhos bem soltos e comecem a vibrar suavemente a partir dos pés. Não forcem nada, apenas deixem a vibração chacoalhar e despertar cada parte do corpo. Estamos religando todos os circuitos."</p></div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-align-center text-yellow-500 mr-3"></i>FASE 2 - O FLUXO DE REALINHAMENTO</h3>
+                <div class="text-sm text-gray-600">Duração: 8 minutos e 30 segundos</div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-1">
+                 <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">2</span>A Varredura do Horizonte</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento:</strong> Mantendo o queixo paralelo ao chão, gire a cabeça lentamente para a direita, como se estivesse escaneando o horizonte, até o seu limite confortável. Retorne ao centro e repita para a esquerda.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Vamos destravar o pescoço. Olhem lentamente por cima de um ombro, e depois do outro. Não é sobre forçar, é sobre escanear e sentir os músculos se alongarem."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-1">01:00</div>
+                    <button onclick="startExerciseTimer(1, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(1)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-2">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">3</span>A Roda-Gigante dos Ombros</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento:</strong> Comece executando três círculos lentos e amplos apenas com os ombros para trás. Na terceira volta, permita que o impulso do ombro continue e arraste o braço inteiro, transformando o movimento em um grande círculo completo do braço. Repita a sequência duas vezes e depois inverta para a frente.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Pensem no ombro como o motor. Três círculos pequenos para ligar. Na terceira volta, deixem o motor dar o impulso para o braço completar o grande círculo. Estamos lubrificando todo o mecanismo."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-2">01:00</div>
+                    <button onclick="startExerciseTimer(2, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(2)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-3">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">4</span>O Vórtice de Mistura</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento:</strong> Pernas afastadas, joelhos semiflexionados, braços abertos na altura dos ombros. Gire o tronco de um lado para o outro de forma contínua e fluida, mantendo o quadril o mais estável possível.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Mantenham o quadril como base e girem o tronco. O movimento é como um vórtice, que agita e renova a energia estagnada na coluna."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-3">01:00</div>
+                    <button onclick="startExerciseTimer(3, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(3)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-4">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">5</span>O Pêndulo do Punho</h5>
+                 <p class="text-gray-700 mb-3"><strong>Movimento (30s cada lado):</strong> Estenda o braço direito para a frente, com a palma para cima. Com a mão esquerda, puxe suavemente os dedos da mão direita para baixo. MANTENDO essa tração, flexione os joelhos e balance o quadril e o tronco de um lado para o outro. Os braços permanecem à frente. Troque de lado.</p>
+                 <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Agora, um 2 em 1. Estendam o braço para a frente e alonguem o punho com a outra mão. Travem essa posição. Agora, o segredo: balancem o quadril. A parte de cima do corpo fica estável; o movimento vem da base. Estamos liberando a tensão do computador no punho enquanto soltamos a coluna."</p></div>
+                 <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-4">01:00</div>
+                    <button onclick="startExerciseTimer(4, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(4)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-5"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">6</span>A Flecha do Alinhamento</h5><p class="text-gray-700 mb-3"><strong>Movimento (alternando lados):</strong> Estenda o braço esquerdo para a frente. Feche a mão direita e puxe-a para trás, na altura da bochecha, como se puxasse um arco e flecha, espremendo a escápula direita. Mantenha por 3 segundos e retorne. Alterne os lados.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Postura de arqueiro. Puxem a corda do arco para trás e sintam a escápula deslizando no meio das costas. Este movimento 'acorda' os músculos que seguram nossos ombros no lugar certo. É o nosso realinhamento postural ativo."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-5">01:00</div><button onclick="startExerciseTimer(5, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(5)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-6"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">7</span>O Ancoradouro do Ombro</h5><p class="text-gray-700 mb-3"><strong>Movimento (30s cada lado):</strong> Coloque a mão esquerda sobre o músculo do trapézio direito para ancorar o ombro para baixo. MANTENDO ESSA PRESSÃO, incline lentamente a cabeça para o lado esquerdo. Mantenha por 2-3 respirações profundas. Retorne devagar e troque o lado.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Vamos atacar aquele ponto tenso. Usem a mão para ancorar o ombro oposto para BAIXO. Com o ombro ancorado, aí sim, inclinem a cabeça. Respirem fundo nesse alongamento. Estamos criando espaço real no pescoço."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-6">01:00</div><button onclick="startExerciseTimer(6, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(6)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-7"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">8</span>A Reconfiguração da Espinha (Gato-Vaca)</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Pernas afastadas, joelhos semiflexionados, mãos nas coxas. Inspire, abrindo o peito (Vaca). Expire, arredondando a coluna (Gato). Mantenha o fluxo contínuo.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Vamos recalibrar a coluna, vértebra por vértebra. Na inspiração, abram o peito. Na expiração, curvem as costas."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-7">01:00</div><button onclick="startExerciseTimer(7, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(7)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-8"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">9</span>O Calcanhar Pulsante</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Mantenha a ponta de ambos os pés firmemente no chão e eleve apenas os calcanhares ritmicamente. Em seguida, inverta: mantenha os calcanhares no chão e eleve apenas a ponta dos pés.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Atenção total aos pés. Primeiro, vamos pulsar com os calcanhares, ativando as panturrilhas. Agora, o oposto. Calcanhares no chão e elevem só a ponta dos pés. Estamos acordando a nossa base."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-8">00:45</div><button onclick="startExerciseTimer(8, 45)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(8)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-9"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">10</span>O Ciclo de Energia Ascendente</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Na expiração, agache levemente (mini-agachamento). Na inspiração, levante-se estendendo os braços para o alto. O movimento é fluido e energizante.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Vamos finalizar com energia. Para baixo na expiração, para o alto na inspiração! Sintam o corpo inteiro trabalhando junto."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-9">00:45</div><button onclick="startExerciseTimer(9, 45)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(9)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-check-circle text-purple-500 mr-3"></i>FASE 3 - INTEGRAÇÃO E FECHAMENTO</h3>
+                <div class="text-sm text-gray-600">Duração: 2 minutos</div>
+            </div>
+            
+            <div class="exercise-card bg-white p-6 rounded-xl mb-4" id="exercise-10">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">11</span>A Liberação da Garrafa de Coca</h4>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-purple-600" id="timer-10">00:30</div>
+                        <button onclick="startExerciseTimer(10, 30)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(10)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Execute a sequência duas vezes: Inspire profundamente pelo nariz, elevando os ombros até as orelhas como se estivesse "sacudindo a garrafa". Solte o ar pela boca com um suspiro audível, deixando os ombros caírem.</p>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Agora, vamos ao nosso grande final. Preparem para liberar toda a pressão acumulada. Inspirem e sacudam a garrafa, trazendo os ombros até as orelhas. Segurem. E soltem o ar, com som! Mais uma vez. Inspira e tensiona... E solta!"</p></div>
+            </div>
+            <div class="exercise-card bg-white p-6 rounded-xl" id="exercise-11">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">12</span>A Entrega Total do Corpo</h4>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-purple-600" id="timer-11">01:30</div>
+                        <button onclick="startExerciseTimer(11, 90)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(11)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Na terceira inspiração, eleve os ombros novamente. Mas desta vez, ao soltar o ar, libere todo o corpo para baixo. Deixe o queixo cair no peito, relaxe os ombros, os braços e curve a coluna até seu tronco ficar completamente solto em direção ao chão, com os joelhos bem flexionados, como um boneco de pano. Fique lá embaixo, respirando suavemente.</p>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500 mt-4"><p class="text-gray-700 italic"><strong>Script Final:</strong> "Última vez, inspirem, tensionem ao máximo... E na expiração, entreguem! Soltem a cabeça, os braços, a coluna. Deixem tudo desabar em direção ao chão. Fiquem aqui embaixo. Respirem. O reset da semana está completo. Ótimo trabalho."</p></div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center"><i class="fas fa-chart-bar text-indigo-500 mr-3"></i>Resumo da Sessão</h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-stopwatch text-blue-500 mr-3"></i>Tempo por Fase</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between"><span>Conexão Inicial:</span><span class="font-semibold text-green-600">1 min 30 seg</span></div>
+                        <div class="flex justify-between"><span>Fluxo de Realinhamento:</span><span class="font-semibold text-yellow-600">8 min 30 seg</span></div>
+                        <div class="flex justify-between"><span>Integração e Fechamento:</span><span class="font-semibold text-purple-600">2 min</span></div>
+                        <hr class="my-2"><div class="flex justify-between text-lg font-bold"><span>Total:</span><span class="text-indigo-600">12 minutos</span></div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-bullseye text-red-500 mr-3"></i>Objetivos da Aula</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-500 mr-2"></i>Liberar tensões do fim de semana.</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-500 mr-2"></i>Reativar o corpo de forma eficaz.</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-500 mr-2"></i>Realinhar a postura para a semana.</li>
+                        <li class="flex items-center"><i class="fas fa-check text-yellow-500 mr-2"></i>Começar a semana com energia e foco.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let audioContext = null;
+        let musicPlaying = false; let musicVolume = 0.05; let audioInitialized = false;
+        let backgroundMusicElement = null; let startSoundElement = null; let endSoundElement = null;
+        let timers = {}; let currentExercise = -1; let completedExercises = 0;
+        
+        const totalExercises = 12;
+        const exerciseDurations = [90, 60, 60, 60, 60, 60, 60, 60, 45, 45, 30, 90];
+        
+        function initializeAudio() {
+            if (audioInitialized) return;
+            try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+            backgroundMusicElement = document.getElementById('backgroundMusic');
+            startSoundElement = document.getElementById('startSound');
+            endSoundElement = document.getElementById('endSound');
+            if (backgroundMusicElement) backgroundMusicElement.volume = musicVolume;
+            if (startSoundElement) startSoundElement.volume = 0.3;
+            if (endSoundElement) endSoundElement.volume = 0.3;
+            audioInitialized = true;
+            if (isIOS) document.getElementById('iosAudioBanner').classList.remove('show');
+        }
+        
+        function activateAudioForIOS() { initializeAudio(); if (audioContext && audioContext.state === 'suspended') audioContext.resume(); if (backgroundMusicElement) { backgroundMusicElement.play().then(() => { backgroundMusicElement.pause(); backgroundMusicElement.currentTime = 0; }); } document.getElementById('iosAudioBanner').classList.remove('show'); showSoundIndicator('Áudio Ativado', 'music'); }
+        function toggleBackgroundMusic() { if (!audioInitialized) initializeAudio(); const musicBtn = document.getElementById('musicBtn'); if (!musicPlaying) { if(backgroundMusicElement){ backgroundMusicElement.play().catch(e=>{}); musicPlaying = true; musicBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pausar'; showSoundIndicator('Música Iniciada', 'music'); } } else { if(backgroundMusicElement){ backgroundMusicElement.pause(); backgroundMusicElement.currentTime = 0; } musicPlaying = false; musicBtn.innerHTML = '<i class="fas fa-music mr-2"></i>Música'; showSoundIndicator('Música Pausada', 'music'); } }
+        function adjustVolume(delta) { musicVolume = Math.max(0, Math.min(0.3, musicVolume + delta)); if (backgroundMusicElement) backgroundMusicElement.volume = musicVolume; showSoundIndicator(`Volume: ${Math.round(musicVolume * 100)}%`, 'music'); }
+        function playSound(type) { if (!audioInitialized) return; const soundElement = type === 'start' ? startSoundElement : endSoundElement; if(soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e=>{}); } }
+        function showSoundIndicator(text, type) { const indicator = document.getElementById('soundIndicator'); const soundText = document.getElementById('soundText'); if (soundText) soundText.textContent = text; if (indicator) { indicator.className = `sound-indicator show ${type}`; setTimeout(() => indicator.classList.remove('show'), 2000); } }
+        function formatTime(seconds) { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }
+        
+        function updateTimerDisplay(exerciseId, timeLeft) {
+            const timerElement = document.getElementById(`timer-${exerciseId}`);
+            if (timerElement) {
+                timerElement.textContent = formatTime(timeLeft);
+                timerElement.classList.remove('active', 'warning', 'danger');
+                if (timeLeft > 0 && timers[exerciseId]) timerElement.classList.add('active');
+                if (timeLeft <= 5) timerElement.classList.add('danger');
+                else if (timeLeft <= 10) timerElement.classList.add('warning');
+            }
+        }
+        
+        function startExerciseTimer(exerciseId, duration) {
+            if (!audioInitialized) initializeAudio();
+            if (timers[exerciseId]) clearInterval(timers[exerciseId]);
+            let timeLeft = duration; currentExercise = exerciseId;
+            const exerciseCard = document.getElementById(`exercise-${exerciseId}`);
+            document.querySelectorAll('.exercise-card').forEach(card => card.classList.remove('active'));
+            if(exerciseCard) exerciseCard.classList.add('active');
+            
+            playSound('start');
+            showSoundIndicator(`Iniciando Ex. #${exerciseId + 1}`, 'start');
+            updateTimerDisplay(exerciseId, timeLeft);
+            
+            timers[exerciseId] = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(exerciseId, timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timers[exerciseId]); delete timers[exerciseId]; playSound('end');
+                    if (exerciseCard) exerciseCard.classList.remove('active');
+                    completedExercises++;
+                    updateProgress();
+                    
+                    const isRunningAll = document.body.dataset.runningAll === 'true';
+                    const nextExerciseId = exerciseId + 1;
+                    
+                    if (isRunningAll && nextExerciseId < totalExercises) {
+                        startExerciseTimer(nextExerciseId, exerciseDurations[nextExerciseId]);
+                    } else if (isRunningAll) {
+                        showSoundIndicator('Aula Finalizada!', 'end');
+                        document.body.dataset.runningAll = 'false';
+                        currentExercise = -1;
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseExerciseTimer(exerciseId) { if (timers[exerciseId]) { clearInterval(timers[exerciseId]); delete timers[exerciseId]; const card = document.getElementById(`exercise-${exerciseId}`); if (card) card.classList.remove('active'); const currentTimeLeft = parseInt(document.getElementById(`timer-${exerciseId}`).textContent.split(':')[0])*60 + parseInt(document.getElementById(`timer-${exerciseId}`).textContent.split(':')[1]); updateTimerDisplay(exerciseId, currentTimeLeft); showSoundIndicator('Exercício Pausado', 'end'); } }
+        function startAllTimers() { resetAllTimers(false); document.body.dataset.runningAll = 'true'; startExerciseTimer(0, exerciseDurations[0]); }
+        function pauseAllTimers() { document.body.dataset.runningAll = 'false'; if (currentExercise > -1) { pauseExerciseTimer(currentExercise); } showSoundIndicator('Todos os Timers Pausados', 'end'); }
+        function resetAllTimers(showAlert = true) {
+            pauseAllTimers();
+            Object.keys(timers).forEach(id => clearInterval(timers[id]));
+            timers = {};
+            
+            for (let i = 0; i < totalExercises; i++) {
+                const timerElement = document.getElementById(`timer-${i}`);
+                if (timerElement) {
+                    timerElement.textContent = formatTime(exerciseDurations[i]);
+                    timerElement.classList.remove('active', 'warning', 'danger');
+                }
+                const card = document.getElementById(`exercise-${i}`);
+                if(card) card.classList.remove('active');
+            }
+            
+            completedExercises = 0; updateProgress();
+            if (showAlert) showSoundIndicator('Aula Reiniciada', 'music');
+        }
+
+        function updateProgress() { const percent = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0; const bar = document.getElementById('progressBar'); const text = document.getElementById('progressText'); if (bar) bar.style.width = `${percent}%`; if (text) text.textContent = `${Math.round(percent)}%`; }
+        document.addEventListener('DOMContentLoaded', function() { if (isIOS) setTimeout(() => document.getElementById('iosAudioBanner').classList.add('show'), 1000); else initializeAudio(); });
+    </script>
+</body>
+</html>
