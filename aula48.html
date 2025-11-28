@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MOV LAB - Aula 52: A Transmutação do Cansaço</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #FFC371 0%, #FF5F6D 100%);
+            min-height: 100vh;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-primary { background: linear-gradient(135deg, #ff6b6b, #ff8e53); transition: all 0.3s ease; min-height: 44px; min-width: 44px; }
+        .btn-primary:hover, .btn-primary:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3); }
+        .btn-secondary { background: linear-gradient(135deg, #FFC371, #FF5F6D); transition: all 0.3s ease; min-height: 44px; min-width: 44px; }
+        .btn-secondary:hover, .btn-secondary:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 95, 109, 0.3); }
+        .btn-success { background: linear-gradient(135deg, #43e97b, #38f9d7); transition: all 0.3s ease; min-height: 44px; }
+        .btn-success:hover, .btn-success:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(67, 233, 123, 0.3); }
+        .btn-warning { background: linear-gradient(135deg, #fa709a, #fee140); transition: all 0.3s ease; min-height: 44px; }
+        .btn-warning:hover, .btn-warning:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(250, 112, 154, 0.3); }
+        .btn-music { background: linear-gradient(135deg, #8b5cf6, #a855f7); transition: all 0.3s ease; min-height: 44px; }
+        .btn-music:hover, .btn-music:active { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3); }
+        
+        .exercise-card { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .exercise-card:hover, .exercise-card:active { border-left-color: #FF5F6D; transform: translateX(5px); }
+        .exercise-card.active {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4) !important;
+            transform: translateX(5px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+        .exercise-card.flow-phase.active {
+            border-left-color: #FFC371;
+            background: linear-gradient(135deg, #fffbeb, #fff8f0) !important;
+        }
+        
+        .timer-display { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.5rem; min-width: 80px; text-align: center; }
+        .timer-display.active { color: #10b981; animation: timerPulse 1s infinite; }
+        .timer-display.warning { color: #f59e0b; animation: timerPulse 0.5s infinite; }
+        .timer-display.danger { color: #ef4444; animation: timerPulse 0.3s infinite; }
+        @keyframes timerPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        
+        .floating-icon { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        .phase-header { background: linear-gradient(135deg, #FFC371, #FF5F6D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .progress-bar { transition: width 1s ease-in-out; }
+        
+        .sound-indicator { position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 12px 16px; border-radius: 8px; color: white; font-weight: bold; opacity: 0; transform: translateY(-20px); transition: all 0.3s ease; }
+        .sound-indicator.show { opacity: 1; transform: translateY(0); }
+        .sound-indicator.start { background: #10b981; }
+        .sound-indicator.end { background: #ef4444; }
+        .sound-indicator.music { background: #8b5cf6; }
+        
+        .music-controls { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; gap: 10px; flex-wrap: wrap; }
+        .flow-phase { border-left: 4px solid #FFC371 !important; }
+        
+        .ios-audio-banner { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: white; padding: 15px; text-align: center; z-index: 2000; transform: translateY(-100%); transition: transform 0.3s ease; }
+        .ios-audio-banner.show { transform: translateY(0); }
+        .ios-audio-banner button { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 20px; border-radius: 25px; margin-top: 10px; font-weight: bold; min-height: 44px; }
+    </style>
+</head>
+<body class="p-4">
+    <div id="iosAudioBanner" class="ios-audio-banner">
+        <div><i class="fas fa-volume-up mr-2"></i><strong>Ativar Áudio</strong></div>
+        <div class="text-sm mt-1">Toque no botão abaixo para ativar os sons e música de fundo</div>
+        <button onclick="activateAudioForIOS()" id="activateAudioBtn"><i class="fas fa-play mr-2"></i>Ativar Áudio</button>
+    </div>
+
+    <div id="soundIndicator" class="sound-indicator">
+        <i class="fas fa-volume-up mr-2"></i><span id="soundText"></span>
+    </div>
+
+    <div class="music-controls">
+        <button onclick="toggleBackgroundMusic()" id="musicBtn" class="btn-music text-white px-4 py-2 rounded-full"><i class="fas fa-music mr-2"></i>Música</button>
+        <button onclick="adjustVolume(-0.1)" class="btn-secondary text-white px-3 py-2 rounded-full"><i class="fas fa-volume-down"></i></button>
+        <button onclick="adjustVolume(0.1)" class="btn-secondary text-white px-3 py-2 rounded-full"><i class="fas fa-volume-up"></i></button>
+    </div>
+
+    <audio id="backgroundMusic" loop preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+    <audio id="startSound" preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+    <audio id="endSound" preload="auto" style="display: none;"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1dJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav"></audio>
+
+    <div class="max-w-4xl mx-auto">
+        <div class="glass-effect rounded-3xl p-8 mb-6 text-center">
+            <div class="floating-icon text-6xl mb-4">🪶</div>
+            <h1 class="text-4xl font-bold phase-header mb-2">Acervo MOV LAB - Aula 52 (B)</h1>
+            <h2 class="text-3xl font-semibold text-gray-800 mb-4">"A Transmutação do Cansaço: Versão Técnica & Sensorial"</h2>
+            <div class="flex flex-wrap justify-center gap-4 text-lg text-gray-600">
+                <div class="flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Material: 1 Folha de Papel Sulfite</div>
+                <div class="flex items-center"><i class="fas fa-clock mr-2 text-purple-500"></i>12-13 minutos</div>
+                <div class="flex items-center"><i class="fas fa-hand-paper mr-2 text-orange-500"></i>Técnica + Foco</div>
+            </div>
+            <div class="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border-l-4 border-red-400">
+                <p class="text-gray-700 italic"><strong>Foco da Aula:</strong> Soltura de tensão nas mãos/punhos, reeducação postural e controle da respiração. O papel é usado para feedback visual e auditivo.</p>
+            </div>
+            
+            <div class="mt-6 flex justify-center space-x-4 flex-wrap">
+                <button onclick="startAllTimers()" class="btn-success text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-play mr-2"></i>Iniciar Aula Completa</button>
+                <button onclick="pauseAllTimers()" class="btn-warning text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-pause mr-2"></i>Pausar Tudo</button>
+                <button onclick="resetAllTimers()" class="btn-primary text-white px-6 py-3 rounded-full mb-2"><i class="fas fa-redo mr-2"></i>Reiniciar Tudo</button>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-xl p-4 mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-semibold text-gray-700">Progresso da Aula</span>
+                <span class="text-sm font-semibold text-gray-700" id="progressText">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="progress-bar bg-gradient-to-r from-green-400 via-yellow-400 to-orange-500 h-3 rounded-full" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-magic text-green-500 mr-3"></i>FASE 1 - CONEXÃO</h3>
+                <div class="text-sm text-gray-600">Duração: 1 minuto</div>
+            </div>
+            <div class="exercise-card bg-white p-6 rounded-xl mb-4" id="exercise-0">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>O Espelho da Respiração</h4>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-green-600" id="timer-0">01:00</div>
+                        <button onclick="startExerciseTimer(0, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(0)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Segure a folha na frente do rosto. Expire de forma longa e controlada pela boca, direcionando o ar para manter a folha inclinada/levantada pelo maior tempo possível.</p>
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Usem a folha para 'ver' a sua respiração. Se o sopro for curto, a folha cai. Se for longo, a folha voa. Controlem a saída do ar para acalmar a mente."</p></div>
+            </div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-recycle text-yellow-500 mr-3"></i>FASE 2 - O PROCESSO ALQUÍMICO</h3>
+                <div class="text-sm text-gray-600">Duração: 10 minutos</div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-1">
+                 <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">2</span>A Captura da Tensão</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento (30s cada mão):</strong> Com o braço esticado ao lado, amasse lentamente a folha usando apenas os dedos daquela mão, até formar uma bola compacta.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Sem usar a outra mão, capturem o papel. Tragam a folha para dentro da mão. Sintam o trabalho dos flexores dos dedos."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-1">01:00</div>
+                    <button onclick="startExerciseTimer(1, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(1)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-2">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">3</span>A Prensa Hidráulica</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento (alternando mãos):</strong> Com o papel amassado na mão, estique o braço à frente. Aperte com força máxima por 3 segundos, tensionando o braço, e solte abruptamente.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Acumulem toda a tensão da semana na mão e apertem! 3, 2, 1... Solta! O segredo não é a força, é a capacidade de relaxar."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-2">00:45</div>
+                    <button onclick="startExerciseTimer(2, 45)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(2)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-3">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">4</span>O Carimbo no Teto</h5>
+                <p class="text-gray-700 mb-3"><strong>Movimento (30s cada lado):</strong> Segure a bolinha na palma da mão para cima. Empurre a mão para o teto, esticando todo o lado do tronco. Olhe para a mão e desça controladamente.</p>
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Estiquem a lateral. Levem o papel o mais alto possível sem jogar. Carimbem o teto. Criem espaço entre a costela e o quadril."</p></div>
+                <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-3">01:00</div>
+                    <button onclick="startExerciseTimer(3, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(3)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+            
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-4">
+                <h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">5</span>A Esfera de Articulação</h5>
+                 <p class="text-gray-700 mb-3"><strong>Movimento (30s cada punho):</strong> Segure a bolinha firme. Apoie o cotovelo na mão oposta. Faça círculos amplos apenas com o punho, como se o papel fosse um pincel.</p>
+                 <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Isso, isolem o punho. Façam círculos perfeitos com o papel. Lubrifiquem a articulação que sofre com o mouse."</p></div>
+                 <div class="flex justify-end items-center space-x-3 mt-4">
+                    <div class="timer-display text-yellow-600" id="timer-4">01:00</div>
+                    <button onclick="startExerciseTimer(4, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                    <button onclick="pauseExerciseTimer(4)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                </div>
+            </div>
+
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-5"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">6</span>A Restauração do Papiro</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Desamasse o papel. Apoie na coxa ou parede e use a lateral da outra mão para alisá-lo com movimentos firmes, do centro para fora.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Agora, a restauração. Alisem as rugas do papel com paciência. Estiquem bem os dedos. O movimento de 'passar' a mão alonga os flexores."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-5">01:30</div><button onclick="startExerciseTimer(5, 90)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(5)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-6"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">7</span>A Moldura Tensa</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Segure a folha pelas extremidades à frente do peito. Tente "rasgar" o papel puxando as mãos para fora (tensão isométrica nas costas). Mantenha a tensão e eleve os braços acima da cabeça e volte.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Tencionem para fora, ativando as costas. Subam e desçam essa moldura, mantendo a postura firme e o peito aberto."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-6">01:00</div><button onclick="startExerciseTimer(6, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(6)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-7"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">8</span>A Bandeja Instável</h5><p class="text-gray-700 mb-3"><strong>Movimento (30s cada mão):</strong> Coloque a folha aberta sobre a palma da mão direita (dedos esticados para trás). Desenhe um "8" (infinito) no ar com o braço, equilibrando a folha na palma sem agarrá-la.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Mão de garçom, dedos para trás. Não deixem o papel cair, mas não agarrem! Isso força a extensão dos dedos, o oposto da garra do dia a dia."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-7">01:00</div><button onclick="startExerciseTimer(7, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(7)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-8"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">9</span>O Volante Gigante</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Segure a folha pelas laterais com braços esticados. Gire o tronco e os braços como se virasse o volante de um ônibus gigante: mão direita vai para cima/esquerda, mão esquerda para baixo/direita.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Girem o volante. Levem o ombro junto. Sintam a torção na coluna torácica liberando a rigidez das costas."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-8">01:00</div><button onclick="startExerciseTimer(8, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(8)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+            <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-9"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">10</span>O Vento Restaurador</h5><p class="text-gray-700 mb-3"><strong>Movimento (30s cada mão):</strong> Segure a folha firmemente por uma ponta e use o movimento rápido do punho (flexão e extensão) para se abanar, criando vento no rosto.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Movimento solto de punho. Criem o seu próprio vento. Sintam o ar fresco no rosto. Acalmem o calor mental e soltem a articulação."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-9">01:00</div><button onclick="startExerciseTimer(9, 60)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(9)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+             <div class="exercise-card flow-phase bg-white p-6 rounded-xl mb-4" id="exercise-10"><h5 class="text-lg font-semibold text-gray-800 flex items-center mb-4"><span class="bg-yellow-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">11</span>A Bandeira ao Vento (Shake)</h5><p class="text-gray-700 mb-3"><strong>Movimento:</strong> Segure a folha com as duas mãos acima da cabeça. Balance o tronco lateralmente, agitando o papel para que ele faça barulho.</p><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Estiquem as laterais. Ouçam o som do papel. É o som da estática indo embora. Balancem como uma bandeira no topo de uma montanha."</p></div><div class="flex justify-end items-center space-x-3 mt-4"><div class="timer-display text-yellow-600" id="timer-10">00:45</div><button onclick="startExerciseTimer(10, 45)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button><button onclick="pauseExerciseTimer(10)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-pause"></i></button></div></div>
+        </div>
+
+        <div class="glass-effect rounded-3xl p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center"><i class="fas fa-check-circle text-purple-500 mr-3"></i>FASE 3 - INTEGRAÇÃO FINAL</h3>
+                <div class="text-sm text-gray-600">Duração: 1 minuto</div>
+            </div>
+            
+            <div class="exercise-card bg-white p-6 rounded-xl mb-4" id="exercise-11">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">12</span>A Escolha do Destino</h5>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-purple-600" id="timer-11">00:30</div>
+                        <button onclick="startExerciseTimer(11, 30)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(11)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Olhe para o papel. Decida: é para jogar fora (amasse de novo) ou para guardar? Realize a ação.</p>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500 mt-4"><p class="text-gray-700 italic"><strong>Script MOV LAB:</strong> "Essa folha absorveu a tensão. O que vocês fazem com isso? Descartem ou guardem. A escolha é de vocês."</p></div>
+            </div>
+            <div class="exercise-card bg-white p-6 rounded-xl" id="exercise-12">
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-3 flex items-center"><span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">13</span>Mãos Vazias e Leves</h5>
+                    <div class="flex items-center space-x-3">
+                        <div class="timer-display text-purple-600" id="timer-12">00:30</div>
+                        <button onclick="startExerciseTimer(12, 30)" class="btn-primary text-white px-3 py-2 rounded-lg text-sm"><i class="fas fa-play"></i></button>
+                        <button onclick="pauseExerciseTimer(12)" class="bg-gray-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-gray-600"><i class="fas fa-pause"></i></button>
+                    </div>
+                </div>
+                <p class="text-gray-700"><strong>Movimento:</strong> Com as mãos livres, braços soltos ao lado. Abra e feche as mãos devagar e depois fique imóvel, sentindo a leveza.</p>
+                <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500 mt-4"><p class="text-gray-700 italic"><strong>Script Final:</strong> "Sintam as mãos agora. Vazias. Leves. Sem papel, sem peso, sem tensão. Vocês transmutaram o cansaço. Bom fim de semana!"</p></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        let audioContext = null;
+        let musicPlaying = false; let musicVolume = 0.05; let audioInitialized = false;
+        let backgroundMusicElement = null; let startSoundElement = null; let endSoundElement = null;
+        let timers = {}; let currentExercise = -1; let completedExercises = 0;
+        
+        const totalExercises = 13;
+        const exerciseDurations = [60, 60, 45, 60, 60, 90, 60, 60, 60, 60, 45, 30, 30];
+        
+        function initializeAudio() {
+            if (audioInitialized) return;
+            try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+            backgroundMusicElement = document.getElementById('backgroundMusic');
+            startSoundElement = document.getElementById('startSound');
+            endSoundElement = document.getElementById('endSound');
+            if (backgroundMusicElement) backgroundMusicElement.volume = musicVolume;
+            if (startSoundElement) startSoundElement.volume = 0.3;
+            if (endSoundElement) endSoundElement.volume = 0.3;
+            audioInitialized = true;
+            if (isIOS) document.getElementById('iosAudioBanner').classList.remove('show');
+        }
+        
+        function activateAudioForIOS() { initializeAudio(); if (audioContext && audioContext.state === 'suspended') audioContext.resume(); if (backgroundMusicElement) { backgroundMusicElement.play().then(() => { backgroundMusicElement.pause(); backgroundMusicElement.currentTime = 0; }); } document.getElementById('iosAudioBanner').classList.remove('show'); showSoundIndicator('Áudio Ativado', 'music'); }
+        function toggleBackgroundMusic() { if (!audioInitialized) initializeAudio(); const musicBtn = document.getElementById('musicBtn'); if (!musicPlaying) { if(backgroundMusicElement){ backgroundMusicElement.play().catch(e=>{}); musicPlaying = true; musicBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>Pausar'; showSoundIndicator('Música Iniciada', 'music'); } } else { if(backgroundMusicElement){ backgroundMusicElement.pause(); backgroundMusicElement.currentTime = 0; } musicPlaying = false; musicBtn.innerHTML = '<i class="fas fa-music mr-2"></i>Música'; showSoundIndicator('Música Pausada', 'music'); } }
+        function adjustVolume(delta) { musicVolume = Math.max(0, Math.min(0.3, musicVolume + delta)); if (backgroundMusicElement) backgroundMusicElement.volume = musicVolume; showSoundIndicator(`Volume: ${Math.round(musicVolume * 100)}%`, 'music'); }
+        function playSound(type) { if (!audioInitialized) return; const soundElement = type === 'start' ? startSoundElement : endSoundElement; if(soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e=>{}); } }
+        function showSoundIndicator(text, type) { const indicator = document.getElementById('soundIndicator'); const soundText = document.getElementById('soundText'); if (soundText) soundText.textContent = text; if (indicator) { indicator.className = `sound-indicator show ${type}`; setTimeout(() => indicator.classList.remove('show'), 2000); } }
+        function formatTime(seconds) { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`; }
+        
+        function updateTimerDisplay(exerciseId, timeLeft) {
+            const timerElement = document.getElementById(`timer-${exerciseId}`);
+            if (timerElement) {
+                timerElement.textContent = formatTime(timeLeft);
+                timerElement.classList.remove('active', 'warning', 'danger');
+                if (timeLeft > 0 && timers[exerciseId]) timerElement.classList.add('active');
+                if (timeLeft <= 5) timerElement.classList.add('danger');
+                else if (timeLeft <= 10) timerElement.classList.add('warning');
+            }
+        }
+        
+        function startExerciseTimer(exerciseId, duration) {
+            if (!audioInitialized) initializeAudio();
+            if (timers[exerciseId]) clearInterval(timers[exerciseId]);
+            let timeLeft = duration; currentExercise = exerciseId;
+            const exerciseCard = document.getElementById(`exercise-${exerciseId}`);
+            document.querySelectorAll('.exercise-card').forEach(card => card.classList.remove('active'));
+            if(exerciseCard) exerciseCard.classList.add('active');
+            
+            playSound('start');
+            showSoundIndicator(`Iniciando Ex. #${exerciseId + 1}`, 'start');
+            updateTimerDisplay(exerciseId, timeLeft);
+            
+            timers[exerciseId] = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(exerciseId, timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timers[exerciseId]); delete timers[exerciseId]; playSound('end');
+                    if (exerciseCard) exerciseCard.classList.remove('active');
+                    completedExercises++;
+                    updateProgress();
+                    
+                    const isRunningAll = document.body.dataset.runningAll === 'true';
+                    const nextExerciseId = exerciseId + 1;
+                    
+                    if (isRunningAll && nextExerciseId < totalExercises) {
+                        startExerciseTimer(nextExerciseId, exerciseDurations[nextExerciseId]);
+                    } else if (isRunningAll) {
+                        showSoundIndicator('Aula Finalizada!', 'end');
+                        document.body.dataset.runningAll = 'false';
+                        currentExercise = -1;
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseExerciseTimer(exerciseId) { if (timers[exerciseId]) { clearInterval(timers[exerciseId]); delete timers[exerciseId]; const card = document.getElementById(`exercise-${exerciseId}`); if (card) card.classList.remove('active'); const currentTimeLeft = parseInt(document.getElementById(`timer-${exerciseId}`).textContent.split(':')[0])*60 + parseInt(document.getElementById(`timer-${exerciseId}`).textContent.split(':')[1]); updateTimerDisplay(exerciseId, currentTimeLeft); showSoundIndicator('Exercício Pausado', 'end'); } }
+        function startAllTimers() { resetAllTimers(false); document.body.dataset.runningAll = 'true'; startExerciseTimer(0, exerciseDurations[0]); }
+        function pauseAllTimers() { document.body.dataset.runningAll = 'false'; if (currentExercise > -1) { pauseExerciseTimer(currentExercise); } showSoundIndicator('Todos os Timers Pausados', 'end'); }
+        function resetAllTimers(showAlert = true) {
+            pauseAllTimers();
+            Object.keys(timers).forEach(id => clearInterval(timers[id]));
+            timers = {};
+            
+            for (let i = 0; i < totalExercises; i++) {
+                const timerElement = document.getElementById(`timer-${i}`);
+                if (timerElement) {
+                    timerElement.textContent = formatTime(exerciseDurations[i]);
+                    timerElement.classList.remove('active', 'warning', 'danger');
+                }
+                const card = document.getElementById(`exercise-${i}`);
+                if(card) card.classList.remove('active');
+            }
+            
+            completedExercises = 0; updateProgress();
+            if (showAlert) showSoundIndicator('Aula Reiniciada', 'music');
+        }
+
+        function updateProgress() { const percent = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0; const bar = document.getElementById('progressBar'); const text = document.getElementById('progressText'); if (bar) bar.style.width = `${percent}%`; if (text) text.textContent = `${Math.round(percent)}%`; }
+        document.addEventListener('DOMContentLoaded', function() { if (isIOS) setTimeout(() => document.getElementById('iosAudioBanner').classList.add('show'), 1000); else initializeAudio(); });
+    </script>
+</body>
+</html>
